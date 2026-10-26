@@ -1,0 +1,11 @@
+# Sensitive credentials and local runtime configurations
+config.php
+settings.json
+bot_log.txt
+
+# OS & Editor files
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/

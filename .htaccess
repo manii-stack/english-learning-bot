@@ -1,0 +1,16 @@
+# Block direct public browser access to logs
+<Files "bot_log.txt">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Protect configuration and settings files
+<Files "config.php">
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+<Files "settings.json">
+    Order Allow,Deny
+    Deny from all
+</Files>

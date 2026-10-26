@@ -1,0 +1,24 @@
+{
+    "admin_password": "admin123",
+    "telegram_token": "",
+    "telegram_secret_token": "",
+    "primary_model": "gemini-3.5-flash-lite",
+    "secondary_model": "gemini-3.1-flash-lite",
+    "enable_secondary_model": true,
+    "explanation_language": "fa",
+    "react_if_perfect": true,
+    "enable_retry_button": true,
+    "min_text_length": 5,
+    "debug_log": true,
+    "keys": [],
+    "cached_models": [
+        "gemini-3.5-flash-lite",
+        "gemini-3.1-flash-lite",
+        "gemini-3.5-flash",
+        "gemini-2.5-flash",
+        "gemini-2.5-flash-lite",
+        "gemini-flash-lite-latest",
+        "gemini-flash-latest",
+        "gemini-2.5-pro"
+    ]
+}
