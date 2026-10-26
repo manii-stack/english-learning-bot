@@ -1,0 +1,6 @@
+{
+    "version": "1.0.0",
+    "release_date": "2026-10-27",
+    "changelog": "Initial stable release featuring 7-language web admin panel, Gemini multi-key automatic failover, secondary fallback model selection, and customizable welcome message.",
+    "download_url": "https://github.com/manii-stack/english-learning-bot/archive/refs/heads/main.zip"
+}

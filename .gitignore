@@ -2,6 +2,8 @@
 config.php
 settings.json
 bot_log.txt
+backups/
+*.zip
 
 # OS & Editor files
 .DS_Store

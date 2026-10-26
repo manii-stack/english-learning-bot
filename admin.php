@@ -14,6 +14,7 @@ session_start();
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/settings.php';
 require_once __DIR__ . '/translations.php';
+require_once __DIR__ . '/updater.php';
 require_once __DIR__ . '/gemini.php';
 require_once __DIR__ . '/telegram.php';
 
@@ -183,7 +184,32 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
             $msg = "<i class=\"bi bi-eraser-fill\"></i> Log file has been cleared.";
         }
     }
+
+    // 12. Check for updates manually
+    elseif ($action === 'check_update') {
+        $upd = AppUpdater::checkForUpdate(true);
+        if ($upd['has_update']) {
+            $msg = "<i class=\"bi bi-gift-fill\"></i> " . __('update_available_title') . " (v{$upd['latest_version']})";
+        } elseif (!empty($upd['error'])) {
+            $errMsg = "<i class=\"bi bi-exclamation-triangle-fill\"></i> " . htmlspecialchars($upd['error']);
+        } else {
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . __('system_up_to_date') . " (v" . BOT_VERSION . ")";
+        }
+    }
+
+    // 13. Apply latest update automatically from GitHub
+    elseif ($action === 'apply_update') {
+        $updResult = AppUpdater::applyUpdate();
+        if ($updResult['ok']) {
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . htmlspecialchars($updResult['message']);
+        } else {
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . htmlspecialchars($updResult['message']);
+        }
+    }
 }
+
+// Check for updates (cached)
+$updateInfo = AppUpdater::checkForUpdate();
 
 // Fetch current runtime status for UI presentation
 $bot = new TelegramBot();
@@ -576,7 +602,7 @@ $currentDir = I18n::getDir();
     <!-- Top Header -->
     <div class="header">
         <div class="brand">
-            <h1><i class="bi bi-robot"></i> <?= htmlspecialchars(__('header_title')) ?></h1>
+            <h1><i class="bi bi-robot"></i> <?= htmlspecialchars(__('header_title')) ?> <span class="code-inline" style="font-size: 11px; vertical-align: middle;">v<?= BOT_VERSION ?></span></h1>
             <div class="developer-tag">
                 <i class="bi bi-person-badge-fill"></i> <?= htmlspecialchars(__('developer')) ?>
             </div>
@@ -603,6 +629,25 @@ $currentDir = I18n::getDir();
     <?php endif; ?>
     <?php if ($errMsg): ?>
         <div class="alert alert-danger"><?= $errMsg ?></div>
+    <?php endif; ?>
+
+    <?php if (!empty($updateInfo['has_update'])): ?>
+        <div class="alert" style="background: linear-gradient(135deg, #0369a1, #0284c7); color: #fff; border: 1px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);">
+            <div>
+                <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                    <i class="bi bi-gift-fill" style="color: #fde047;"></i> <?= htmlspecialchars(__('update_available_title')) ?> (v<?= htmlspecialchars($updateInfo['latest_version']) ?>)
+                </div>
+                <div style="font-size: 13px; opacity: 0.95;">
+                    <?= htmlspecialchars($updateInfo['changelog'] ?: 'A new version is available on GitHub.') ?> — <span style="font-size: 12px; opacity: 0.85;"><i class="bi bi-shield-check"></i> <?= htmlspecialchars(__('updating_notice')) ?></span>
+                </div>
+            </div>
+            <form method="POST" style="margin: 0;">
+                <input type="hidden" name="action" value="apply_update">
+                <button type="submit" class="btn btn-success" onclick="return confirm('<?= htmlspecialchars(__('update_confirm')) ?>');" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; padding: 10px 16px;">
+                    <i class="bi bi-cloud-arrow-down-fill"></i> <?= htmlspecialchars(__('update_btn')) ?> v<?= htmlspecialchars($updateInfo['latest_version']) ?>
+                </button>
+            </form>
+        </div>
     <?php endif; ?>
 
     <!-- Navigation Tabs -->
@@ -658,6 +703,25 @@ $currentDir = I18n::getDir();
             <div class="stat-box">
                 <div class="title"><i class="bi bi-cpu"></i> <?= htmlspecialchars(__('primary_model')) ?></div>
                 <div class="num" style="font-size: 14px; margin-top: 10px;"><?= htmlspecialchars($primaryModel) ?></div>
+            </div>
+            <div class="stat-box">
+                <div class="title" style="justify-content: space-between;">
+                    <span><i class="bi bi-tag-fill"></i> <?= htmlspecialchars(__('system_up_to_date')) ?></span>
+                    <form method="POST" style="margin: 0; display: inline;">
+                        <input type="hidden" name="action" value="check_update">
+                        <button type="submit" class="btn btn-secondary btn-sm" style="padding: 2px 7px; font-size: 11px;" title="<?= htmlspecialchars(__('btn_check_update')) ?>">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="num" style="font-size: 14px; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <span>v<?= BOT_VERSION ?></span>
+                    <?php if (!empty($updateInfo['has_update'])): ?>
+                        <span class="badge rate_limited" style="font-size: 11px;">v<?= htmlspecialchars($updateInfo['latest_version']) ?></span>
+                    <?php else: ?>
+                        <span class="badge active" style="font-size: 11px;"><i class="bi bi-check2"></i></span>
+                    <?php endif; ?>
+                </div>
             </div>
         </div>
 

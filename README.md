@@ -62,6 +62,12 @@ It includes an **autonomous Web Administration Panel (`admin.php`)** featuring *
    - Real-time live Telegram preview as you type with support for HTML tags and emojis.
    - One-click restore to default message.
 
+8. **⚡ 1-Click In-App GitHub Auto-Updater:**
+   - Detects new versions released on GitHub directly inside the admin panel.
+   - 1-click update: downloads, extracts, and replaces core files seamlessly.
+   - **Zero Configuration Loss:** `settings.json`, `config.php`, API keys, and logs are 100% protected and never overwritten.
+   - Automatically creates timestamped backups in `backups/` before applying updates.
+
 ---
 
 ### 📂 Directory Structure
@@ -167,6 +173,12 @@ https://your-domain.com/admin.php
    - مدیریت کامل پیام استارت در گفتگوی خصوصی از تب مجزا در پنل مدیریت.
    - پیش‌نمایش زنده هم‌زمان با تایپ در قالب پیام تلگرام همراه با پشتیبانی از اموجی و تگ‌های HTML تلگرام.
    - امکان بازگردانی سریع به پیام پیش‌فرض اولیه با یک کلیک.
+
+8. **⚡ بروزرسان خودکار ۱-کلیکه از گیت‌هاب (In-App Auto Updater):**
+   - تشخیص هوشمند و اعلام انتشار نسخه جدید گیت‌هاب در بالای پنل مدیریت.
+   - بروزرسانی تنها با ۱ کلیک: دانلود پکیج جدید، اکسترکت و جایگزینی فایل‌های اصلی بدون نیاز به دسترسی به هاست یا ترمینال.
+   - **حفظ ۱۰۰٪ تنظیمات شخصی:** فایل‌های `settings.json`، `config.php`، لیست کلیدهای API و لاگ‌ها به هیچ وجه بازنویسی نمی‌شوند و دست‌نخورده باقی می‌مانند.
+   - ایجاد خودکار بکاپ کامل در پوشه `backups/` قبل از اعمال هر آپدیت جهت امنیت کامل.
 
 ---
 
