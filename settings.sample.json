@@ -6,6 +6,7 @@
     "secondary_model": "gemini-3.1-flash-lite",
     "enable_secondary_model": true,
     "explanation_language": "fa",
+    "welcome_message": "👋 <b>سلام! من ربات هوشمند اصلاح زبان انگلیسی هستم.</b>\n\n🔹 من با مدل‌های پیشرفته <b>Google Gemini</b> کار می‌کنم تا خطاهای گرامری، املایی و لحن جملات را سریع تصحیح کنم.\n\n👥 <b>نحوه استفاده در گروه:</b>\n1. من را به گروه چت انگلیسی خود اضافه کنید.\n2. حتماً در @BotFather تنظیمات <b>Privacy Mode</b> من را <b>Disable</b> کنید.\n3. به انگلیسی چت کنید؛ اگر جمله‌ای اشکال داشته باشد، فوراً آن را تصحیح کرده و راه‌های طبیعی‌تر گفتن آن را پیشنهاد می‌دهم!\n\n✨ همچنین می‌توانید همین‌جا یک جمله انگلیسی بفرستید تا برایتان تست کنم!",
     "react_if_perfect": true,
     "enable_retry_button": true,
     "min_text_length": 5,

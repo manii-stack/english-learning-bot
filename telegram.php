@@ -51,7 +51,13 @@ class TelegramBot
             $params['reply_markup'] = is_array($replyMarkup) ? json_encode($replyMarkup) : $replyMarkup;
         }
 
-        return $this->request('sendMessage', $params);
+        $res = $this->request('sendMessage', $params);
+        // Fallback to plain text if Telegram fails due to malformed HTML entities
+        if (empty($res['ok']) && $parseMode === 'HTML' && isset($res['description']) && stripos($res['description'], "can't parse entities") !== false) {
+            unset($params['parse_mode']);
+            $res = $this->request('sendMessage', $params);
+        }
+        return $res;
     }
 
     /**

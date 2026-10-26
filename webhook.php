@@ -97,13 +97,7 @@ if (isset($update['message'])) {
     // Direct /start command handler in private chats
     if ($chatType === 'private') {
         if ($text === '/start') {
-            $welcome = "👋 <b>سلام! من ربات هوشمند اصلاح زبان انگلیسی هستم.</b>\n\n";
-            $welcome .= "🔹 من با مدل‌های پیشرفته <b>Google Gemini</b> کار می‌کنم تا خطاهای گرامری، املایی و لحن جملات را سریع تصحیح کنم.\n\n";
-            $welcome .= "👥 <b>نحوه استفاده در گروه:</b>\n";
-            $welcome .= "1. من را به گروه چت انگلیسی خود اضافه کنید.\n";
-            $welcome .= "2. حتماً در @BotFather تنظیمات <b>Privacy Mode</b> من را <b>Disable</b> کنید.\n";
-            $welcome .= "3. به انگلیسی چت کنید؛ اگر جمله‌ای اشکال داشته باشد، فوراً آن را تصحیح کرده و راه‌های طبیعی‌تر گفتن آن را پیشنهاد می‌دهم!\n\n";
-            $welcome .= "✨ همچنین می‌توانید همین‌جا یک جمله انگلیسی بفرستید تا برایتان تست کنم!";
+            $welcome = SettingsManager::get('welcome_message', SettingsManager::getDefaultWelcomeMessage());
             $bot->sendMessage($chatId, $welcome);
             exit(json_encode(['status' => 'Start sent']));
         }

@@ -57,6 +57,11 @@ It includes an **autonomous Web Administration Panel (`admin.php`)** featuring *
 6. **🧪 Live AI Simulator & Debugging:**
    - Test any sentence directly from the admin panel to inspect model responses, key rotation behavior, and raw JSON payloads in real time.
 
+7. **👋 Customizable Welcome & Start Message (/start):**
+   - Full control over the private chat welcome message from a dedicated dashboard tab.
+   - Real-time live Telegram preview as you type with support for HTML tags and emojis.
+   - One-click restore to default message.
+
 ---
 
 ### 📂 Directory Structure
@@ -157,6 +162,11 @@ https://your-domain.com/admin.php
 
 6. **🧪 شبیه‌ساز زنده هوش مصنوعی:**
    - بخش تست زنده در پنل مدیریت برای بررسی نحوه پاسخ مدل، چرخش کلیدها و خروجی تلگرام بدون نیاز به تست داخل گروه.
+
+7. **👋 تب اختصاصی شخصی‌سازی پیام خوش‌آمدگویی (/start):**
+   - مدیریت کامل پیام استارت در گفتگوی خصوصی از تب مجزا در پنل مدیریت.
+   - پیش‌نمایش زنده هم‌زمان با تایپ در قالب پیام تلگرام همراه با پشتیبانی از اموجی و تگ‌های HTML تلگرام.
+   - امکان بازگردانی سریع به پیام پیش‌فرض اولیه با یک کلیک.
 
 ---
 

@@ -140,6 +140,18 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
+    // 8.1 Save or restore bot welcome message
+    elseif ($action === 'save_welcome') {
+        if (!empty($_POST['restore_default'])) {
+            SettingsManager::set('welcome_message', SettingsManager::getDefaultWelcomeMessage());
+            $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('btn_reset_welcome') . " - OK.";
+        } else {
+            $wText = trim($_POST['welcome_message'] ?? '');
+            SettingsManager::set('welcome_message', $wText);
+            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('btn_save_welcome') . " - OK.";
+        }
+    }
+
     // 9. Register webhook with Telegram
     elseif ($action === 'set_webhook') {
         $bot = new TelegramBot();
@@ -607,6 +619,9 @@ $currentDir = I18n::getDir();
         <button class="tab-btn" onclick="openTab('tab-settings')">
             <i class="bi bi-sliders"></i> <?= htmlspecialchars(__('tab_settings')) ?>
         </button>
+        <button class="tab-btn" onclick="openTab('tab-welcome')">
+            <i class="bi bi-chat-heart-fill"></i> <?= htmlspecialchars(__('tab_welcome')) ?>
+        </button>
         <button class="tab-btn" onclick="openTab('tab-test')">
             <i class="bi bi-chat-left-dots-fill"></i> <?= htmlspecialchars(__('tab_test')) ?>
         </button>
@@ -918,6 +933,45 @@ $currentDir = I18n::getDir();
     </div>
 
     <!-- ======================================================== -->
+    <!-- Tab: Bot Welcome & Start Message -->
+    <!-- ======================================================== -->
+    <div id="tab-welcome" class="tab-content">
+        <div class="card">
+            <h2><span><i class="bi bi-chat-heart-fill"></i> <?= htmlspecialchars(__('welcome_card_title')) ?></span></h2>
+            <p style="font-size: 13px; color: var(--text-muted); line-height: 1.8;">
+                <?= htmlspecialchars(__('welcome_desc')) ?>
+            </p>
+
+            <form method="POST">
+                <input type="hidden" name="action" value="save_welcome">
+
+                <label style="font-size: 13px; color: var(--text-muted);"><?= htmlspecialchars(__('welcome_label')) ?></label>
+                <textarea name="welcome_message" id="welcome_message_input" rows="8" required style="font-family: inherit; font-size: 14px; line-height: 1.7;"><?= htmlspecialchars(SettingsManager::get('welcome_message', SettingsManager::getDefaultWelcomeMessage())) ?></textarea>
+
+                <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
+                    <i class="bi bi-info-circle"></i> <?= __('welcome_tags_hint') ?>
+                </div>
+
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-floppy-fill"></i> <?= htmlspecialchars(__('btn_save_welcome')) ?>
+                    </button>
+                    <button type="submit" name="restore_default" value="1" class="btn btn-secondary" onclick="return confirm('<?= htmlspecialchars(__('btn_reset_welcome')) ?>?');">
+                        <i class="bi bi-arrow-counterclockwise"></i> <?= htmlspecialchars(__('btn_reset_welcome')) ?>
+                    </button>
+                </div>
+            </form>
+
+            <div style="margin-top: 30px; border-top: 1px solid var(--card-border); padding-top: 20px;">
+                <h3 style="font-size: 14px; color: var(--accent); margin-bottom: 12px;">
+                    <i class="bi bi-phone"></i> <?= htmlspecialchars(__('welcome_preview_title')) ?>
+                </h3>
+                <div id="welcome_preview_box" style="background: #0f172a; border: 1px solid var(--card-border); border-radius: 10px; padding: 16px; line-height: 1.8; font-size: 14px; white-space: pre-wrap;"><?= nl2br(strip_tags(SettingsManager::get('welcome_message', SettingsManager::getDefaultWelcomeMessage()), '<b><strong><i><em><code><a><pre>')) ?></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================== -->
     <!-- Tab 5: Live Test & Chat Simulator -->
     <!-- ======================================================== -->
     <div id="tab-test" class="tab-content">
@@ -1027,6 +1081,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (savedTab && document.getElementById(savedTab)) {
         const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(savedTab));
         if (btn) btn.click();
+    }
+
+    // Live preview for welcome message editor
+    const welcomeInput = document.getElementById('welcome_message_input');
+    const welcomePreview = document.getElementById('welcome_preview_box');
+    if (welcomeInput && welcomePreview) {
+        welcomeInput.addEventListener('input', () => {
+            welcomePreview.innerHTML = welcomeInput.value.replace(/\n/g, '<br>');
+        });
     }
 });
 </script>
