@@ -24,8 +24,9 @@ I18n::init();
 // Initialize settings
 SettingsManager::load();
 
-$msg = null;
-$errMsg = null;
+$msg = $_SESSION['flash_msg'] ?? null;
+$errMsg = $_SESSION['flash_err'] ?? null;
+unset($_SESSION['flash_msg'], $_SESSION['flash_err']);
 
 // Handle user logout
 if (isset($_GET['logout'])) {
@@ -51,6 +52,14 @@ if (!$isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['login
 // Session state check
 if (!empty($_SESSION['admin_logged_in'])) {
     $isLoggedIn = true;
+}
+
+// Background AJAX update checker endpoint
+if ($isLoggedIn && isset($_GET['ajax_check_update'])) {
+    header('Content-Type: application/json');
+    $upd = AppUpdater::checkForUpdate(true);
+    echo json_encode($upd);
+    exit;
 }
 
 // Handle administrative form submissions
@@ -205,6 +214,18 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . htmlspecialchars($updResult['message']);
         }
+    }
+
+    // Post/Redirect/Get pattern: prevent form resubmission on page refresh (F5)
+    if (!empty($action)) {
+        if ($msg) {
+            $_SESSION['flash_msg'] = $msg;
+        }
+        if ($errMsg) {
+            $_SESSION['flash_err'] = $errMsg;
+        }
+        header('Location: admin.php');
+        exit;
     }
 }
 
@@ -516,6 +537,52 @@ $currentDir = I18n::getDir();
         .btn-secondary:hover { background: #475569; color: #fff; }
         .btn-sm { padding: 6px 10px; font-size: 12px; }
 
+        /* Pulsing semi-transparent green glow animation for update button */
+        .btn-update-pulse {
+            background: rgba(16, 185, 129, 0.22);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.7);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            text-decoration: none;
+            transition: all 0.25s ease-in-out;
+            animation: pulseGlow 1.8s infinite ease-in-out;
+        }
+        .btn-update-pulse:hover {
+            background: rgba(16, 185, 129, 0.45);
+            color: #ffffff;
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.7);
+        }
+        @keyframes pulseGlow {
+            0% {
+                background: rgba(16, 185, 129, 0.18);
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+                border-color: rgba(16, 185, 129, 0.5);
+                transform: scale(1);
+            }
+            50% {
+                background: rgba(16, 185, 129, 0.42);
+                box-shadow: 0 0 22px 6px rgba(16, 185, 129, 0.55);
+                border-color: #34d399;
+                color: #ffffff;
+                transform: scale(1.02);
+            }
+            100% {
+                background: rgba(16, 185, 129, 0.18);
+                box-shadow: 0 0 4px rgba(16, 185, 129, 0.3);
+                border-color: rgba(16, 185, 129, 0.5);
+                transform: scale(1);
+            }
+        }
+
         .login-box {
             max-width: 440px;
             margin: 60px auto;
@@ -608,6 +675,15 @@ $currentDir = I18n::getDir();
             </div>
         </div>
         <div class="header-actions">
+            <!-- Pulsing Green Update Button in Header -->
+            <form method="POST" id="header_update_form" style="display: <?= !empty($updateInfo['has_update']) ? 'inline-block' : 'none' ?>; margin: 0;">
+                <input type="hidden" name="action" value="apply_update">
+                <button type="submit" class="btn-update-pulse" onclick="return confirm('<?= htmlspecialchars(__('update_confirm')) ?>');" title="<?= htmlspecialchars(__('update_btn')) ?>">
+                    <i class="bi bi-arrow-up-circle-fill"></i>
+                    <span><?= htmlspecialchars(__('update_btn')) ?> v<span class="upd-ver"><?= htmlspecialchars($updateInfo['latest_version'] ?? '') ?></span></span>
+                </button>
+            </form>
+
             <div style="display: flex; align-items: center; gap: 6px;">
                 <i class="bi bi-translate" style="color: var(--accent);"></i>
                 <select onchange="location.href='?lang='+this.value" class="lang-select" style="margin: 0;">
@@ -631,24 +707,22 @@ $currentDir = I18n::getDir();
         <div class="alert alert-danger"><?= $errMsg ?></div>
     <?php endif; ?>
 
-    <?php if (!empty($updateInfo['has_update'])): ?>
-        <div class="alert" style="background: linear-gradient(135deg, #0369a1, #0284c7); color: #fff; border: 1px solid #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);">
-            <div>
-                <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
-                    <i class="bi bi-gift-fill" style="color: #fde047;"></i> <?= htmlspecialchars(__('update_available_title')) ?> (v<?= htmlspecialchars($updateInfo['latest_version']) ?>)
-                </div>
-                <div style="font-size: 13px; opacity: 0.95;">
-                    <?= htmlspecialchars($updateInfo['changelog'] ?: 'A new version is available on GitHub.') ?> — <span style="font-size: 12px; opacity: 0.85;"><i class="bi bi-shield-check"></i> <?= htmlspecialchars(__('updating_notice')) ?></span>
-                </div>
+    <div id="update_banner_container" class="alert" style="background: linear-gradient(135deg, #0369a1, #0284c7); color: #fff; border: 1px solid #38bdf8; display: <?= !empty($updateInfo['has_update']) ? 'flex' : 'none' ?>; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; box-shadow: 0 4px 15px rgba(2, 132, 199, 0.25);">
+        <div>
+            <div style="font-size: 15px; font-weight: bold; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+                <i class="bi bi-gift-fill" style="color: #fde047;"></i> <?= htmlspecialchars(__('update_available_title')) ?> (v<span class="upd-ver"><?= htmlspecialchars($updateInfo['latest_version'] ?? '') ?></span>)
             </div>
-            <form method="POST" style="margin: 0;">
-                <input type="hidden" name="action" value="apply_update">
-                <button type="submit" class="btn btn-success" onclick="return confirm('<?= htmlspecialchars(__('update_confirm')) ?>');" style="box-shadow: 0 4px 10px rgba(0,0,0,0.3); font-weight: bold; padding: 10px 16px;">
-                    <i class="bi bi-cloud-arrow-down-fill"></i> <?= htmlspecialchars(__('update_btn')) ?> v<?= htmlspecialchars($updateInfo['latest_version']) ?>
-                </button>
-            </form>
+            <div style="font-size: 13px; opacity: 0.95;">
+                <span id="update_banner_changelog"><?= htmlspecialchars($updateInfo['changelog'] ?: 'A new version is available on GitHub.') ?></span> — <span style="font-size: 12px; opacity: 0.85;"><i class="bi bi-shield-check"></i> <?= htmlspecialchars(__('updating_notice')) ?></span>
+            </div>
         </div>
-    <?php endif; ?>
+        <form method="POST" style="margin: 0;">
+            <input type="hidden" name="action" value="apply_update">
+            <button type="submit" class="btn-update-pulse" onclick="return confirm('<?= htmlspecialchars(__('update_confirm')) ?>');" style="padding: 10px 18px; font-size: 14px;">
+                <i class="bi bi-cloud-arrow-down-fill"></i> <?= htmlspecialchars(__('update_btn')) ?> v<span class="upd-ver"><?= htmlspecialchars($updateInfo['latest_version'] ?? '') ?></span>
+            </button>
+        </form>
+    </div>
 
     <!-- Navigation Tabs -->
     <div class="tabs">
@@ -1155,6 +1229,24 @@ document.addEventListener('DOMContentLoaded', () => {
             welcomePreview.innerHTML = welcomeInput.value.replace(/\n/g, '<br>');
         });
     }
+
+    // Asynchronous background update check on admin load
+    fetch('admin.php?ajax_check_update=1')
+        .then(r => r.json())
+        .then(data => {
+            if (data && data.has_update) {
+                const headerForm = document.getElementById('header_update_form');
+                if (headerForm) headerForm.style.display = 'inline-block';
+                const banner = document.getElementById('update_banner_container');
+                if (banner) banner.style.display = 'flex';
+                document.querySelectorAll('.upd-ver').forEach(el => el.textContent = data.latest_version);
+                if (data.changelog) {
+                    const chEl = document.getElementById('update_banner_changelog');
+                    if (chEl) chEl.textContent = data.changelog;
+                }
+            }
+        })
+        .catch(() => {});
 });
 </script>
 

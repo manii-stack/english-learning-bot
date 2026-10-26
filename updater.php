@@ -12,7 +12,7 @@ if (!defined('BOT_APP')) {
 }
 
 if (!defined('BOT_VERSION')) {
-    define('BOT_VERSION', '1.0.0');
+    define('BOT_VERSION', '1.0.1');
 }
 
 require_once __DIR__ . '/settings.php';
