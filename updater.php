@@ -12,7 +12,7 @@ if (!defined('BOT_APP')) {
 }
 
 if (!defined('BOT_VERSION')) {
-    define('BOT_VERSION', '1.0.1');
+    define('BOT_VERSION', '1.0.2');
 }
 
 require_once __DIR__ . '/settings.php';
@@ -216,6 +216,7 @@ class AppUpdater
         return [
             'ok' => true,
             'message' => "Application updated successfully! ($copiedCount files updated). All your API keys and custom settings were preserved.",
+            'copied' => $copiedCount,
             'backup' => $backupDir
         ];
     }

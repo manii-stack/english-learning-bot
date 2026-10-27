@@ -1,6 +1,6 @@
 {
-    "version": "1.0.1",
+    "version": "1.0.2",
     "release_date": "2026-10-27",
-    "changelog": "Fixed page refresh form resubmission (PRG pattern), added pulsing green auto-updater button, and enhanced welcome message editor.",
+    "changelog": "Full multilingual localization for all admin feedback flash messages across 7 languages (fa, en, tr, fr, de, es, ar).",
     "download_url": "https://github.com/manii-stack/english-learning-bot/archive/refs/heads/main.zip"
 }

@@ -72,9 +72,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $keyName = trim($_POST['key_label'] ?? 'Key');
         $added = SettingsManager::addKeys($rawKeys, $keyName);
         if ($added > 0) {
-            $msg = "<i class=\"bi bi-check-circle-fill\"></i> Successfully added $added new API key(s).";
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . sprintf(__('msg_keys_added'), $added);
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-triangle-fill\"></i> No valid or new API keys found (duplicates are skipped).";
+            $errMsg = "<i class=\"bi bi-exclamation-triangle-fill\"></i> " . __('msg_no_keys_found');
         }
     }
 
@@ -82,7 +82,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'delete_key') {
         $keyToDelete = $_POST['key_to_delete'] ?? '';
         if (SettingsManager::deleteKey($keyToDelete)) {
-            $msg = "<i class=\"bi bi-trash3-fill\"></i> Key deleted successfully.";
+            $msg = "<i class=\"bi bi-trash3-fill\"></i> " . __('msg_key_deleted');
         }
     }
 
@@ -90,14 +90,14 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'reset_key') {
         $keyToReset = $_POST['key_to_reset'] ?? '';
         if (SettingsManager::resetKeyStatus($keyToReset)) {
-            $msg = "<i class=\"bi bi-arrow-repeat\"></i> Key status has been reset to Active.";
+            $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('msg_key_reset');
         }
     }
 
     // 4. Reset all keys status to active
     elseif ($action === 'reset_all_keys') {
         SettingsManager::resetAllKeyStatuses();
-        $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('btn_reset_all_keys') . " - Done.";
+        $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('msg_all_keys_reset');
     }
 
     // 5. Test specific API key connectivity
@@ -105,9 +105,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $keyToTest = $_POST['key_to_test'] ?? '';
         $testRes = GeminiService::testSpecificKey($keyToTest);
         if ($testRes['status'] === 'success') {
-            $msg = "<i class=\"bi bi-check-circle-fill\"></i> Key test was successful! Model responded normally.";
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . __('msg_key_test_ok');
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> Key test failed (HTTP {$testRes['http_code']}): " . htmlspecialchars($testRes['error']);
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . sprintf(__('msg_key_test_fail'), $testRes['http_code'], htmlspecialchars($testRes['error']));
         }
     }
 
@@ -116,9 +116,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $modelsRes = GeminiService::fetchAvailableModels();
         if ($modelsRes['ok']) {
             $count = count($modelsRes['models']);
-            $msg = "<i class=\"bi bi-check-circle-fill\"></i> Successfully retrieved and cached $count AI models from Google.";
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . sprintf(__('msg_models_fetched'), $count);
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> Error fetching models: " . htmlspecialchars($modelsRes['error']);
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . sprintf(__('msg_models_fetch_fail'), htmlspecialchars($modelsRes['error']));
         }
     }
 
@@ -127,7 +127,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         SettingsManager::set('primary_model', trim($_POST['primary_model'] ?? 'gemini-3.5-flash-lite'));
         SettingsManager::set('secondary_model', trim($_POST['secondary_model'] ?? 'gemini-3.1-flash-lite'));
         SettingsManager::set('enable_secondary_model', !empty($_POST['enable_secondary_model']));
-        $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('btn_save_models') . " - OK.";
+        $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('msg_models_saved');
     }
 
     // 8. Save general bot settings and update admin password if provided
@@ -144,9 +144,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $newPass = trim($_POST['new_password'] ?? '');
         if (!empty($newPass)) {
             SettingsManager::set('admin_password', $newPass);
-            $msg = "<i class=\"bi bi-floppy-fill\"></i> General settings and new password updated successfully.";
+            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('msg_settings_pass_saved');
         } else {
-            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('btn_save_settings') . " - OK.";
+            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('msg_settings_saved');
         }
     }
 
@@ -154,11 +154,11 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'save_welcome') {
         if (!empty($_POST['restore_default'])) {
             SettingsManager::set('welcome_message', SettingsManager::getDefaultWelcomeMessage());
-            $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('btn_reset_welcome') . " - OK.";
+            $msg = "<i class=\"bi bi-arrow-repeat\"></i> " . __('msg_welcome_reset');
         } else {
             $wText = trim($_POST['welcome_message'] ?? '');
             SettingsManager::set('welcome_message', $wText);
-            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('btn_save_welcome') . " - OK.";
+            $msg = "<i class=\"bi bi-floppy-fill\"></i> " . __('msg_welcome_saved');
         }
     }
 
@@ -169,9 +169,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $sec = SettingsManager::get('telegram_secret_token', '');
         $res = $bot->setWebhook($whUrl, $sec);
         if (!empty($res['ok'])) {
-            $msg = "<i class=\"bi bi-check-circle-fill\"></i> Webhook successfully registered:<br><code>$whUrl</code>";
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . sprintf(__('msg_wh_set'), htmlspecialchars($whUrl));
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> Webhook setup error: " . ($res['description'] ?? 'Unknown error');
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . sprintf(__('msg_wh_set_fail'), htmlspecialchars($res['description'] ?? 'Unknown error'));
         }
     }
 
@@ -180,9 +180,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $bot = new TelegramBot();
         $res = $bot->deleteWebhook();
         if (!empty($res['ok'])) {
-            $msg = "<i class=\"bi bi-trash3-fill\"></i> Telegram webhook deleted successfully.";
+            $msg = "<i class=\"bi bi-trash3-fill\"></i> " . __('msg_wh_deleted');
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> Webhook deletion error: " . ($res['description'] ?? 'Unknown error');
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . sprintf(__('msg_wh_del_fail'), htmlspecialchars($res['description'] ?? 'Unknown error'));
         }
     }
 
@@ -190,7 +190,7 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'clear_log') {
         if (file_exists(LOG_FILE)) {
             file_put_contents(LOG_FILE, '');
-            $msg = "<i class=\"bi bi-eraser-fill\"></i> Log file has been cleared.";
+            $msg = "<i class=\"bi bi-eraser-fill\"></i> " . __('msg_logs_cleared');
         }
     }
 
@@ -210,9 +210,9 @@ if ($isLoggedIn && $_SERVER['REQUEST_METHOD'] === 'POST') {
     elseif ($action === 'apply_update') {
         $updResult = AppUpdater::applyUpdate();
         if ($updResult['ok']) {
-            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . htmlspecialchars($updResult['message']);
+            $msg = "<i class=\"bi bi-check-circle-fill\"></i> " . sprintf(__('msg_update_applied'), $updResult['copied'] ?? 0);
         } else {
-            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . htmlspecialchars($updResult['message']);
+            $errMsg = "<i class=\"bi bi-exclamation-octagon-fill\"></i> " . sprintf(__('msg_update_failed'), htmlspecialchars($updResult['message']));
         }
     }
 
